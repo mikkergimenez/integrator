@@ -2,7 +2,7 @@ module Deploy
   module AWS
     class ECSTask
       def initialize client, config
-        @ecs = client
+        @client = client
         @config = config
       end
 
@@ -13,8 +13,17 @@ module Deploy
         512
       end
 
-      def docker_image
-        @config.docker.image
+      def docker_tag
+        @config.docker.tag
+      end
+
+      def exists?(task_definition_name)
+        tasks = @client.list_tasks(
+          cluster: @config.ecs.cluster_name,
+          family: task_definition_name
+        )
+
+        return tasks.task_arns.length > 0
       end
 
       #
@@ -31,15 +40,50 @@ module Deploy
         1024
       end
 
-      def register task_definition_name
-        @ecs.register_task_definition({
+      def traefik_labels
+        {
+          'traefik.frontend.rule'         => "Host:#{@config.dns.hostname}",
+          'traefik.frontend.entryPoints'  => 'http,https'
+        }
+      end
+
+      def docker_labels
+        labels = {}
+
+        if @config.load_balancing.enabled
+          if @config.load_balancing.provider == 'traefik'
+            labels = labels.merge(traefik_labels)
+          end
+        end
+
+        labels
+      end
+
+      def host_port
+        @config.load_balancing.host_port
+      end
+
+      def port_mappings
+        return [] unless @config.load_balancing.enabled
+        [{
+          container_port: @config.docker.container_port,
+          host_port: host_port,
+          protocol: 'tcp', # accepts tcp, udp
+        }]
+      end
+
+      def register(task_definition_name)
+        @client.register_task_definition({
           family: task_definition_name,
           container_definitions: [{
             name: task_definition_name,
-            image: docker_image,
+            image: docker_tag,
             cpu: cpu_limit,
             memory: memory,
             memory_reservation: memory_reservation,
+            environment: @config.env_vars.name_value_pair(),
+            port_mappings: port_mappings,
+            docker_labels: docker_labels
           }]
         })
       end

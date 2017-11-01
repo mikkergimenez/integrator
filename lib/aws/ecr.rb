@@ -6,9 +6,27 @@ module AWS
     end
 
     def check_for_or_create_repo image_name
+      return create_repo unless repo_exists?(image_name)
+      puts "Found Repo #{image_name}"
+    end
+
+    private
+    def create_repo image_name
+      puts "Creating Repo #{image_name}"
       @client.create_repository({
         repository_name: image_name,
       })
+    end
+
+    def repo_exists? image_name
+      begin
+        repos = @client.describe_repositories(
+          repository_names: [image_name]
+        )
+      rescue
+        return false
+      end
+      return repos.repositories.length > 0
     end
   end
 end

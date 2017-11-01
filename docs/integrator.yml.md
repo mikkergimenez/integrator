@@ -14,12 +14,11 @@ build:
   method: docker
 
 docker:
-  registry: 853691203509.dkr.ecr.us-east-1.amazonaws.com
-  image: iyf-api
+  registry: string
+  image: string
 
 deploy:
-  method: ecs
-  job_file: config/ecs.json
+  method: string
 
 ecs:
   cluster: "Production"
@@ -41,11 +40,17 @@ takes a string with options:
 
 Accepts a command to perform testing, such as:
 
-`
+```
 test:
   command: <command>
-`
+```
 
-ruby defaults to: ` rake test `
+ruby defaults to: `rake test`
 
-golang defaults to: ` go test ./... `
+golang defaults to: `go test ./...`
+
+### deploy
+
+#### method
+
+Accepts "ecs" or "nomad"

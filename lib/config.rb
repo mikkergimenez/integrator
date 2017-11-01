@@ -1,11 +1,16 @@
 require 'yaml'
+
+require 'config/dns'
 require 'config/docker'
+require 'config/ecs'
+require 'config/environment'
+require 'config/load_balancing'
 
 #
 # This class loads the YAML config
 #
 class Config
-  attr_reader :full_config, :language, :deploy
+  attr_reader :full_config, :deploy
 
   class DeployConfig
     def initialize full_config
@@ -39,11 +44,13 @@ class Config
   end
 
   def pre_build
-    @full_config["pre_build"]["comand"]
+    @full_config["pre_build"]["command"]
   end
 
   def test_command
-    @full_config["test"]["command"]
+    return @full_config["test"]["command"] if @full_config["test"]["command"]
+    return 'rake test'      if language == 'ruby'
+    return 'go test ./...'  if language == 'go'
   end
 
   def language
@@ -54,11 +61,23 @@ class Config
     @full_config["test"]
   end
 
+  def dns
+    @dns      ||= ConfigDNS.new 'production', @full_config
+  end
+
+  def load_balancing
+    @lbc      ||= ConfigLoadBalancing.new @full_config
+  end
+
   def ecs
-    @ecs ||= Config::ECS.new @full_config
+    @ecs      ||= ConfigECS.new @full_config
+  end
+
+  def env_vars
+    @env_vars ||= ConfigEnvironment.new 'production', @full_config
   end
 
   def docker
-    @docker ||= Docker.new @full_config
+    @docker   ||= ConfigDocker.new @full_config
   end
 end

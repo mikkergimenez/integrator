@@ -6,32 +6,41 @@ require 'json'
 require 'net/http'
 require 'optparse'
 require 'repos'
+require 'resolv-replace'
 require 'slack-notifier'
 
-user = ENV["BITBUCKET_USERNAME"]
-pass = ENV["BITBUCKET_PASSWORD"]
-uri = URI('https://api.bitbucket.org/1.0/user/repositories')
-req = Net::HTTP::Get.new(uri)
-req.basic_auth user, pass
+def connect_to_source_control
+  user          = ENV["BITBUCKET_USERNAME"]
+  pass          = ENV["BITBUCKET_PASSWORD"]
 
-http = Net::HTTP.new(uri.hostname, uri.port)
-http.use_ssl = true
+  uri           = URI('https://api.bitbucket.org/1.0/user/repositories')
 
-http.start
-options = {}
-options[:force_build] = false
-options[:forced_build_name] = ''
+  req           = Net::HTTP::Get.new(uri)
+  req.basic_auth user, pass
 
-opt_parser = OptionParser.new do |opts|
-  opts.banner = "Usage: example.rb [options]"
+  http          = Net::HTTP.new(uri.hostname, uri.port)
+  http.use_ssl  = true
+  [req, http]
+end
 
-  # Optional argument; multi-line description.
+def get_options
+  options = {}
+  options[:force_build] = false
+  options[:forced_build_name] = ''
 
-  opts.on("-f", "--force [BUILD_NAME]", "Forces a build on repo with name BUILD_NAME") do |build|
-    options[:force_build] = true
-    options[:forced_build_name] = build
-  end
-end.parse!
+  opt_parser = OptionParser.new do |opts|
+    opts.banner = "Usage: example.rb [options]"
+
+    # Optional argument; multi-line description.
+
+    opts.on("-f", "--force [BUILD_NAME]", "Forces a build on repo with name BUILD_NAME") do |build|
+      options[:force_build] = true
+      options[:forced_build_name] = build
+    end
+  end.parse!
+
+  options
+end
 
 def trigger_build repo, last_updated
   puts "#{repo.name} last Updated: #{repo.last_updated}"
@@ -49,6 +58,9 @@ def trigger_build repo, last_updated
   end
   puts "Done Building, going back to cycle"
 end
+
+req, http = connect_to_source_control
+options   = get_options
 
 while true
   build_triggered = false

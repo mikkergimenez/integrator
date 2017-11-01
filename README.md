@@ -9,6 +9,18 @@ private repos.
 
 # Running
 
+You have to set a few environment variables to get this working.  To support Bitbucket, configure your username and password using:
+
+```
+BITBUCKET_USERNAME
+BITBUCKET_PASSWORD
+```
+
+To post messages to slack use:
+```
+SLACK_HOOK_URL
+```
+
 launch using
 
 ```ruby integrator.rb```
@@ -23,7 +35,7 @@ force the build of one of your repo's. use:
 Create an integrator.yml file in the root of your application.  For the syntax
 of integrator.yml see:
 
-[Integrator.yml docs](docs/integratory.yml)
+[Integrator.yml docs](docs/integrator.yml.md)
 
 # Test/Build your application
 

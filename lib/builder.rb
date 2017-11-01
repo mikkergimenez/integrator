@@ -101,7 +101,7 @@ class Builder
   def deploy
     deployer = Deploy.for(
       deploy_method: config.deploy.method,
-      config: config.deploy.job_file,
+      config: config,
       runner: @runner
     )
     deployer.start

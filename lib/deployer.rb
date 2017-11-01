@@ -23,6 +23,7 @@ module Deploy
   class ECS < Deployer
     def deploy
       aws_ecs = AWS::ECS.new @config
+      aws_ecs.deploy
     end
 
     def start
