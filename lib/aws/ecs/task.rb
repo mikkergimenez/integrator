@@ -10,7 +10,7 @@ module Deploy
       # The number of cpu units reserved for the container. A container instance has 1,024 cpu units for every CPU core. This parameter specifies the minimum amount of CPU to reserve for a container, and containers share unallocated CPU units with other containers on the instance with the same ratio as their allocated amount. This parameter maps to CpuShares in the Create a container section of the Docker Remote API and the --cpu-shares option to docker run.
       #
       def cpu_limit
-        512
+        128
       end
 
       def docker_tag

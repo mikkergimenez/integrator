@@ -6,7 +6,7 @@ module AWS
     end
 
     def check_for_or_create_repo image_name
-      return create_repo unless repo_exists?(image_name)
+      return create_repo(image_name) unless repo_exists?(image_name)
       puts "Found Repo #{image_name}"
     end
 

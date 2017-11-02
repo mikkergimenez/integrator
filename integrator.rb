@@ -15,6 +15,8 @@ def connect_to_source_control
 
   uri           = URI('https://api.bitbucket.org/1.0/user/repositories')
 
+  puts "Polling Bitbucket, because BITBUCKET_USERNAME and BITBUCKET_PASSWORD are set."
+
   req           = Net::HTTP::Get.new(uri)
   req.basic_auth user, pass
 

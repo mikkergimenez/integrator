@@ -49,6 +49,8 @@ ruby defaults to: `rake test`
 
 golang defaults to: `go test ./...`
 
+*Important* For all commands run on a script in your repo, remember to include './'
+
 ### deploy
 
 #### method
