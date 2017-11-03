@@ -7,11 +7,7 @@ class Runner
     puts "\nRunning #{command_string} in #{@checkout_dir}"
     Dir.chdir(@checkout_dir) do
       IO.popen('ls -la') { |io| io.read }
-      if command_string.include?(".sh")
-        system "./#{command_string}"
-      else
-        system command_string
-      end
+      system "#{command_string}"
     end
   end
 end

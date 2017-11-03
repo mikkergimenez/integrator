@@ -44,7 +44,12 @@ class Config
   end
 
   def pre_build
-    @full_config["pre_build"]["command"]
+    begin
+      return @full_config["pre_build"]["command"]
+    rescue
+      puts "No Pre-Build Step"
+      return nil
+    end
   end
 
   def test_command
