@@ -13,7 +13,7 @@ class ConfigEnvironment
 
   def name_value_pair
     pair_list = []
-
+    return pair_list unless @env_config
     @env_config[@environment].each do |k, v|
       pair_list.push(
         name: k,

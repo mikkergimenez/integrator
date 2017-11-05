@@ -53,9 +53,10 @@ class Config
   end
 
   def test_command
-    return @full_config["test"]["command"] if @full_config["test"]["command"]
+    return @full_config["test"]["command"] if @full_config["test"] && @full_config["test"]["command"]
     return 'rake test'      if language == 'ruby'
     return 'go test ./...'  if language == 'go'
+    return nil if language == "docker"
   end
 
   def language

@@ -67,7 +67,7 @@ class Builder
     # Make sure that `gem install nio4r -v '2.1.0'` succeeds before bundling.
     if config.language == "go"
       @runner.repo_command "go get"
-    else
+    elsif config.language == "ruby"
       @runner.repo_command "bundle package" # --gemfile=#{checkout_dir}/Gemfile
     end
   end
@@ -99,6 +99,7 @@ class Builder
   end
 
   def deploy
+    puts "Deploying App"
     deployer = Deploy.for(
       deploy_method: config.deploy.method,
       config: config,
@@ -110,6 +111,10 @@ class Builder
   def run_tests
     puts "Running tests against #{@name}"
     $LOAD_PATH.unshift(File.expand_path(checkout_dir)) unless $LOAD_PATH.include?(File.expand_path(checkout_dir))
+    unless config.test_command
+      puts "No tests to run"
+      return true
+    end
     @runner.repo_command(config.test_command)
   end
 

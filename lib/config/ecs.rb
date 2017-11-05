@@ -29,4 +29,12 @@ class ConfigECS
     return @ecs_config["instances"] if @ecs_config["instances"]
     DEFAULT_CONTAINER_INSTANCES
   end
+
+  def memory_reservation
+    return @ecs_config['memory_reservation']
+  end
+
+  def memory
+    return @ecs_config['memory']
+  end
 end

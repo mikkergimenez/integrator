@@ -30,14 +30,14 @@ module Deploy
       # Memory hard limit in mb
       #
       def memory
-        2048
+        @config.ecs.memory || 2048
       end
 
       #
       # Memory soft limit in MB
       #
       def memory_reservation
-        1024
+        @config.ecs.memory_reservation || 1024
       end
 
       def traefik_labels
