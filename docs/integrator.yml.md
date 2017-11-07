@@ -33,7 +33,13 @@ ecs:
 takes a string with options:
 
 `ruby`
+Installs dependencies, then runs tests against an application written in Ruby.
+
 `go`
+Compiles an application written in go.
+
+`docker`
+Only builds/deploys a docker container, does not try to test/build code.
 
 ### test
 

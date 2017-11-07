@@ -64,12 +64,34 @@ module Deploy
       end
 
       def port_mappings
-        return [] unless @config.load_balancing.enabled
-        [{
-          container_port: @config.docker.container_port,
-          host_port: host_port,
-          protocol: 'tcp', # accepts tcp, udp
-        }]
+        return [] unless @config.load_balancing.enabled || @config.ecs.expose_docker_ports || @config.ecs.port_mappings
+        if @config.load_balancing.enabled
+          return [{
+            container_port: @config.docker.container_port,
+            host_port: host_port,
+            protocol: 'tcp', # accepts tcp, udp
+          }]
+        elsif @config.ecs.expose_docker_ports == "directly"
+          port_mappings = []
+          @config.docker.container_port.each do |p|
+            port_mappings.push({
+              container_port: p,
+              host_port: p,
+              protocol: 'tcp'
+            })
+          end
+          return port_mappings
+        else
+          port_mappings = []
+          return @config.ecs.port_mappings.each do |cp, hp|
+            port_mappings.push({
+              container_port: cp,
+              host_port: hp,
+              protocol: 'tcp'
+            })
+          end
+          return port_mappings
+        end
       end
 
       def register(task_definition_name)
@@ -83,8 +105,9 @@ module Deploy
             memory_reservation: memory_reservation,
             environment: @config.env_vars.name_value_pair(),
             port_mappings: port_mappings,
-            docker_labels: docker_labels
-          }]
+            docker_labels: docker_labels,
+          }],
+          placement_constraints: @config.ecs.constraints.map { |c| {type: c.keys()[0], expression: c.values()[0]}  }
         })
       end
     end

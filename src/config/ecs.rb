@@ -4,10 +4,19 @@ class ConfigECS
   def initialize full_config
     @ecs_config = full_config['ecs']
   end
+
   def service_name
     return @ecs_config["service_name"] if @ecs_config["service_name"]
     return @ecs_config["name"] if @ecs_config["name"]
     raise "No service name Specified, add ecs: service_name: to your integrator.yaml"
+  end
+
+  def constraints
+    @ecs_config["constraints"] || []
+  end
+
+  def expose_docker_ports
+    @ecs_config["expose_docker_ports"] || ""
   end
 
   def task_definition_name

@@ -3,6 +3,7 @@ require 'config'
 require 'runner'
 require 'deployer'
 require 'aws/ecr'
+require 'tester'
 
 #
 # The "Builder" object runs through the process of testing, building and
@@ -44,13 +45,12 @@ class Builder
     @config ||= Config.new checkout_dir
   end
 
-
   def build
     puts ''
     checkout
 
     install_dependencies
-    test_outcome = run_tests
+    test_outcome = Tester.run(config, checkout_dir)
     puts "Test Outcome #{test_outcome}"
     if test_outcome
       pre_build
@@ -106,16 +106,6 @@ class Builder
       runner: @runner
     )
     deployer.start
-  end
-
-  def run_tests
-    puts "Running tests against #{@name}"
-    $LOAD_PATH.unshift(File.expand_path(checkout_dir)) unless $LOAD_PATH.include?(File.expand_path(checkout_dir))
-    unless config.test_command
-      puts "No tests to run"
-      return true
-    end
-    @runner.repo_command(config.test_command)
   end
 
   private
