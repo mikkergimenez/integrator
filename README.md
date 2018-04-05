@@ -43,6 +43,7 @@ Integrator supports the following Languages:
 
 * [Ruby](https://www.ruby-lang.org/)
 * [Golang](https://golang.org/)
+* [Node](https://nodejs.org/)
 
 # Deploy your Application
 

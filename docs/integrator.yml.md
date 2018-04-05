@@ -35,6 +35,10 @@ takes a string with options:
 `ruby`
 Installs dependencies, then runs tests against an application written in Ruby.
 
+`node`
+Installs dependencies, then runs tests against an application written in Node.js.
+
+
 `go`
 Compiles an application written in go.
 

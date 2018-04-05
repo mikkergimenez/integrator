@@ -1,4 +1,4 @@
-class Runner
+class ShellRunner
   def initialize checkout_dir
     @checkout_dir = checkout_dir
   end

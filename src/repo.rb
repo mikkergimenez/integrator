@@ -9,25 +9,44 @@ class Repo
   attr_accessor :name, :last_updated, :created_on, :logo, :slug
 
   @trigger_build = false
-
   def initialize(repo_obj)
-    @repo_obj = repo_obj
-    @created_on = repo_obj['created_on']
-    @name = repo_obj['name']
-    @owner = repo_obj['owner']
-    @logo = repo_obj['logo']
+    @g            = nil
+    @repo_obj     = repo_obj
+    @created_on   = repo_obj['created_on']
+    @name         = repo_obj['name']
+    @owner        = repo_obj['owner']
+    @logo         = repo_obj['logo']
     @last_updated = repo_obj['last_updated']
-    @slug = repo_obj['slug']
+    @slug         = repo_obj['slug']
   end
 
-  def build current_last_updated
-    uri = "#{@owner}@bitbucket.org:#{@owner}/#{@name}.git"
+  def checkout
+    puts "Working with #{@g}"
+    if @g
+      puts 'Pulling latest '
+      @g.pull # I don't think this pull is working
+    else
+      begin
+        puts "Checking out #{uri}"
+        @g = Git.clone(uri, @name, path: checkout_path)
+      rescue Git::GitExecuteError
+        puts "Checking out #{uri}"
+        @g = Git.clone(uri, @name, path: checkout_path)
+      end
+    end
 
-    builder = Builder.new uri, @name
-    builder.build
+    "/tmp/checkout/#{@name}"
+  end
 
-    @last_updated = current_last_updated
+  def checkout_dir
+    "/tmp/checkout/#{@name}"
+  end
 
+  def uri
+    if @name.end_with?("/")
+      @name.chomp("/")
+    end
+    "#{@owner}@bitbucket.org:#{@owner}/#{@name}.git"
   end
 
   def trigger_build?
@@ -47,4 +66,8 @@ class Repo
     return last_updated != current_last_updated
   end
 
+  private
+  def checkout_path
+    '/tmp/checkout'
+  end
 end

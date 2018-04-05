@@ -27,63 +27,78 @@ class Config
   end
 
 
-  def initialize(repo_dir)
-    if File.exist? "#{repo_dir}/integrator.yml"
-      @full_config = YAML.load_file("#{repo_dir}/integrator.yml")
-    elsif File.exist? "#{repo_dir}/integrator.yaml"
-      @full_config = YAML.load_file("#{repo_dir}/integrator.yaml")
-    elsif File.exist? "#{repo_dir}/Gemfile"
-      @language = 'ruby'
-    elsif File.exist? "#{repo_dir}/requirements.txt"
-      @language = 'python'
-    end
-    @deploy = DeployConfig.new @full_config
+  def full_config
+    return YAML.load_file("#{@repo_dir}/integrator.yml") if File.exist? "#{@repo_dir}/integrator.yml"
+    return YAML.load_file("#{@repo_dir}/integrator.yaml") if File.exist? "#{@repo_dir}/integrator.yaml"
+  end
 
-    puts "No integrator.yml found" if @full_config.nil?
+  def initialize(repo_dir)
+    @repo_dir = repo_dir
+
+    @deploy = DeployConfig.new full_config
+
+    puts "No integrator.yml found" if full_config.nil?
 
   end
 
   def pre_build
     begin
-      return @full_config["pre_build"]["command"]
+      return full_config["pre_build"]["command"]
     rescue
       puts "No Pre-Build Step"
       return nil
     end
   end
 
+  def install_command
+    return full_config["install"]["command"] if full_config["install"] && full_config["install"]["command"]
+    return "go get"         if language == "go"
+    return "bundle package" if language == "ruby"
+    return "npm install"    if language == "node"
+  end
+
   def test_command
-    return @full_config["test"]["command"] if @full_config["test"] && @full_config["test"]["command"]
+    return full_config["test"]["command"] if full_config["test"] && full_config["test"]["command"]
     return 'rake test'      if language == 'ruby'
     return 'go test ./...'  if language == 'go'
-    return nil if language == "docker"
+    return 'npm test'       if language == 'node'
+    return nil              if language == "docker"
   end
 
   def language
-    @full_config["language"]
+    full_config["language"] if full_config["language"]
+    'ruby'    if File.exist? "#{@repo_dir}/Gemfile"
+    'python'  if File.exist? "#{@repo_dir}/requirements.txt"
+    'python'  if File.exist? "#{@repo_dir}/setup.py"
+    'go'      if File.exist? "#{@repo_dir}/main.go"
+    'node'    if File.exist? "#{@repo_dir}/package.json"
   end
 
   def test
-    @full_config["test"]
+    full_config["test"]
+  end
+
+  def pre_test
+    full_config["pre_test"]
   end
 
   def dns
-    @dns      ||= ConfigDNS.new 'production', @full_config
+    @dns      ||= ConfigDNS.new 'production', full_config
   end
 
   def load_balancing
-    @lbc      ||= ConfigLoadBalancing.new @full_config
+    @lbc      ||= ConfigLoadBalancing.new full_config
   end
 
   def ecs
-    @ecs      ||= ConfigECS.new @full_config
+    @ecs      ||= ConfigECS.new full_config
   end
 
   def env_vars
-    @env_vars ||= ConfigEnvironment.new 'production', @full_config
+    @env_vars ||= ConfigEnvironment.new 'production', full_config
   end
 
   def docker
-    @docker   ||= ConfigDocker.new @full_config
+    @docker   ||= ConfigDocker.new full_config
   end
 end

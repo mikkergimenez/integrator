@@ -52,6 +52,8 @@ while true
         job.trigger()
         build_triggered = true
         options[:force_build] = false
+
+        job.cleanup()
       end
     end
 
@@ -62,6 +64,8 @@ while true
       )
       job.trigger()
       build_triggered = true
+
+      job.cleanup()
     end
   end
 
