@@ -22,7 +22,7 @@ class Repo
 
   def checkout
     puts "Working with #{@g}"
-    if @g
+    if false #@g
       puts 'Pulling latest '
       @g.pull # I don't think this pull is working
     else
