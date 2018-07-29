@@ -45,6 +45,12 @@ Integrator supports the following Languages:
 * [Golang](https://golang.org/)
 * [Node](https://nodejs.org/)
 
+And the following Source Control Sites
+
+* [Bitbucket](http://www.bitbucket.org)
+* [Github](http://www.github.com)
+* [Gitlab](http://www.gitlab.com)
+
 # Deploy your Application
 
 Integrator supports the following deploy destinations:
