@@ -1,7 +1,7 @@
 # Why Integator?
 
   Integrator is a tool to enable hobby developers to leverage all of the
-benefits of a modern CI/CD process, without having to manage any servers.
+benefits of a modern CD process, without having to manage any servers.
 Integrator runs on your local laptop, reaches out to your source control
 provider, then tests, builds and deploys your app while you work.  Because
 Integrator is open source, and not a hosted service, it is free for public and
