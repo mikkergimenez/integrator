@@ -83,6 +83,7 @@ module Deploy
           return port_mappings
         else
           port_mappings = []
+          return port_mappings unless defined?(@config.ecs.port_mappings)
           return @config.ecs.port_mappings.each do |cp, hp|
             port_mappings.push({
               container_port: cp,
