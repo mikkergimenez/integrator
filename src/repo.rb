@@ -14,11 +14,11 @@ class Repo
     @provider     = provider
     @repo_obj     = repo_obj
     @created_on   = repo_obj['created_on']
-    @name         = repo_obj['name']
-    @owner        = repo_obj['owner']
-    @logo         = repo_obj['logo']
-    @last_updated = repo_obj['last_updated']
-    @slug         = repo_obj['slug']
+    @name         = repo_obj['name'] || repo_obj[:name]
+    @owner        = repo_obj['owner'] || repo_obj[:owner]
+    @logo         = repo_obj['logo'] || repo_obj[:logo]
+    @last_updated = repo_obj['last_updated'] || repo_obj[:last_updated]
+    @slug         = repo_obj['slug'] || repo_obj[:slug]
   end
 
   def checkout
@@ -40,7 +40,7 @@ class Repo
   end
 
   def last_updated
-    return  @repo_obj["last_activity_at"] if @provider == "gitlab"
+    return @repo_obj["last_activity_at"] if @provider == "gitlab"
     return @repo_obj["last_updated"]
   end
 

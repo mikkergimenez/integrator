@@ -55,7 +55,6 @@ while true
     local_repo = Repos.get(repo, provider)
 
     if options[:force_build]
-      puts "Forcing Build"
       if local_repo.name == options[:forced_build_name]
         puts "Build found, building #{options[:forced_build_name]}"
         job = Job.new(
@@ -71,7 +70,7 @@ while true
       end
     end
 
-    if local_repo.been_updated? repo.last_updated()
+    if local_repo.been_updated? local_repo.last_updated()
       job = Job.new(
         local_repo: local_repo,
         updated: repo["last_updated"]
