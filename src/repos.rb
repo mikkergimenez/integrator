@@ -6,12 +6,12 @@ require 'repo'
 class Repos
   @repos = []
 
-  def self.get(repo_obj)
+  def self.get(repo_obj, provider)
     list.each do |item|
       next if item.slug != repo_obj["slug"]
       return item
     end
-    repo = Repo.new repo_obj
+    repo = Repo.new repo_obj, provider
     @repos.push(repo)
     repo
   end

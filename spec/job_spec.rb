@@ -7,7 +7,7 @@ RSpec.describe Job do
     repo_obj = {
       name: 'repo'
     }
-    local_repo = Repo.new(repo_obj)
+    local_repo = Repo.new(repo_obj, "bitbucket")
     job = Job.new(local_repo: local_repo, updated: Time.now)
 
     expect(job).to be_an_instance_of(Job)

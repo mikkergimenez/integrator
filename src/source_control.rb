@@ -3,7 +3,7 @@ class SourceControl
   @pass = nil
   @uri = nil
   @org
-  def connect_to_bitbucket
+  def connect_to_bitbucket auto=false
     @user          = ENV["BITBUCKET_USERNAME"]
     @pass          = ENV["BITBUCKET_PASSWORD"]
 
@@ -11,20 +11,19 @@ class SourceControl
 
     @authentication = "basic_auth"
 
-    puts "Polling Bitbucket, because BITBUCKET_USERNAME and BITBUCKET_PASSWORD environment variables are set."
+    puts "Polling Bitbucket, because BITBUCKET_USERNAME and BITBUCKET_PASSWORD environment variables are set." if auto
 
   end
 
-  def connect_to_gitlab
+  def connect_to_gitlab auto=false
     @token          = ENV["GITLAB_PA_TOKEN"]
+    @username       = ENV["GITLAB_USERNAME"]
     @authentication = "Private-Token"
 
-    @uri  = URI('https://gitlab.com/api/v4/users/mikkergp/projects') # Fix
-    puts "Polling Gitlab, because GITLAB_PA_TOKEN environment variables is set."
-
+    @uri  = URI("https://gitlab.com/api/v4/users/#{@username}/projects?private_token=#{@token}") # Fix
   end
 
-  def connect_to_github
+  def connect_to_github auto=false
     # Placeholder to connect to github.
     @user = ENV["GITHUB_USERNAME"]
     @pass = ENV["GITHUB_PASSWORD"]
@@ -33,18 +32,32 @@ class SourceControl
 
     @uri  = URI('https://api.github.com/user/repos')
 
-    puts "Polling Github, because GITHUB_USERNAME and GITHUB_PASSWORD environment variables are set."
+    if ((@user.nil? or @pass.nil?) and @token.nil?) or @uri.nil?
+      abort("Can't Connect to Github.  Please set GITHUB_USERNAME & GITHUB_PASSWORD.")
+    end
+
+    puts "Polling Github, because GITHUB_USERNAME and GITHUB_PASSWORD environment variables are set." if auto
 
   end
 
-  def connect
-    if ENV["GITLAB_PA_TOKEN"]
-      connect_to_gitlab
-    elsif ENV["GITHUB_USERNAME"] && ENV["GITHUB_PASSWORD"]
-      connect_to_github
-    elsif ENV["BITBUCKET_USERNAME"] && ENV["BITBUCKET_PASSWORD"]
-      connect_to_bitbucket
+  def connect provider
+    if provider
+      connect_to_gitlab if provider == "gitlab"
+      connect_to_github if provider == "github"
+      connect_to_bitbucket if provider == "bitbucket"
+    else
+      if ENV["GITLAB_PA_TOKEN"] && ENV["GITLAB_USERNAME"]
+        connect_to_gitlab(true)
+        provider = "gitlab"
+      elsif ENV["GITHUB_USERNAME"] && ENV["GITHUB_PASSWORD"]
+        connect_to_github(true)
+        provider = "github"
+      elsif ENV["BITBUCKET_USERNAME"] && ENV["BITBUCKET_PASSWORD"]
+        connect_to_bitbucket(true)
+        provider = "bitbucket"
+      end
     end
+
 
     if ((@user.nil? or @pass.nil?) and @token.nil?) or @uri.nil?
       raise Exception.new("Can't Connect to Source Control.  Please set the relevant environment variables.")
@@ -57,7 +70,7 @@ class SourceControl
 
     http          = Net::HTTP.new(@uri.hostname, @uri.port)
     http.use_ssl  = true
-    [req, http]
+    [req, http, provider]
   end
 
 end
