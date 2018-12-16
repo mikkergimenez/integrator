@@ -1,6 +1,6 @@
 require 'colorize'
 require 'config'
-require 'aws/ecr'
+require 'provider/aws/ecr'
 
 #
 # The "Builder" object runs through the process of testing, building and
@@ -30,7 +30,7 @@ class Build
 
   def push
     if @config.docker.tag.include?("dkr.ecr")
-      aws_ecr = AWS::ECR.new
+      aws_ecr = Provider::AWS::ECR.new
       aws_ecr.check_for_or_create_repo @config.docker.image
     end
     push_results = @runner.repo_command "docker push #{@config.docker.tag}"

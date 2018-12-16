@@ -1,4 +1,4 @@
-require 'aws/ecs'
+require 'provider/aws/ecs'
 module Deploy
   class Deployer
     def initialize(config, runner)
