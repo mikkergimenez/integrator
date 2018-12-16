@@ -1,5 +1,5 @@
 require 'aws-sdk'
-require 'aws/ecs/task'
+require 'provider/aws/ecs/task'
 
 ECS_ENV_VARS_NOT_SET_EXCEPTION = 'In order to use the ECS Plugin, Please ensure the AWS_ACCES_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables are set'
 
