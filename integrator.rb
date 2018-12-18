@@ -9,6 +9,7 @@ require 'repos'
 require 'resolv-replace'
 require 'slack-notifier'
 require 'source_control'
+require 'test_platform'
 require 'job'
 
 def get_options
@@ -17,10 +18,31 @@ def get_options
   retval[:forced_build_name] = ''
   retval[:provider] = ''
 
+  retval[:verobse] = false
+
+  retval[:run_test_platform] = false
+  retval[:test_platform] = ''
+
   opt_parser = OptionParser.new do |opts|
     opts.banner = "Usage: integrator.rb [options]"
 
     # Optional argument; multi-line description.
+
+    opts.on("-t", "--test [PLATFORM]", "One of '[e]cs', '[k]ubernetes', or '[n]omad'.") do |platform|
+      retval[:run_test_platform] = true
+      retval[:test_platform] = platform
+      unless ["ecs", "kubernetes", "nomad", "e", "k", "n"].include? platform
+        abort("Platform(-t) must be one of '[e]cs', '[k]ubernetes', or '[n]omad'")
+      end
+    end
+
+    opts.on("-v", "--verbose", "Verbose logging options") do |verbose|
+      retval[:verbose] = true
+    end
+
+    opts.on("-b", "--build [BUILD_NAME_FILTER]", "Only runs command against a certain repo") do |build|
+      retval[:build_name_filter] = build
+    end
 
     opts.on("-p", "--provider [PROVIDER]", "One of 'gitlab', 'github', or 'bitbucket'.") do |provider|
       retval[:provider] = provider
@@ -39,6 +61,20 @@ def get_options
 end
 
 options = get_options
+
+full_platform_names = {
+  'k' =>          'kubernetes',
+  'kubernetes' =>'kubernetes',
+  'e' =>         'ecs',
+  'ecs' =>'ecs',
+  'n' =>'nomad',
+  'nomad' =>'nomad',
+}
+
+if options[:run_test_platform]
+  TestPlatform.new(full_platform_names[options[:test_platform]]).run
+  exit(0)
+end
 
 sc = SourceControl.new
 req, http, provider = sc.connect(options[:provider])
