@@ -1,7 +1,7 @@
 # Repos manages a list of repos in memory for the app to check against
 # Runs buils when an app has been updated
 
-require 'repo'
+require 'source_control/repo'
 
 class Repos
   @repos = []

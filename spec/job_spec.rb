@@ -1,6 +1,6 @@
 require 'spec_helper'
 require 'job'
-require 'repo'
+require 'source_control/repo'
 
 RSpec.describe Job do
   it "sums the prices of its line items" do

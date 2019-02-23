@@ -17,7 +17,7 @@ class SourceControl
 
   def connect_to_gitlab auto=false
     @token          = ENV["GITLAB_PA_TOKEN"]
-    @username       = ENV["GITLAB_USERNAME"]
+    @user           = ENV["GITLAB_USERNAME"]
     @authentication = "Private-Token"
 
     @uri  = URI("https://gitlab.com/api/v4/users/#{@username}/projects?private_token=#{@token}") # Fix
@@ -42,22 +42,25 @@ class SourceControl
 
   def connect provider
     if provider
+      puts "Provider was set"
       connect_to_gitlab if provider == "gitlab"
       connect_to_github if provider == "github"
       connect_to_bitbucket if provider == "bitbucket"
     else
       if ENV["GITLAB_PA_TOKEN"] && ENV["GITLAB_USERNAME"]
+        puts "Connecting to Gitlab"
         connect_to_gitlab(true)
         provider = "gitlab"
       elsif ENV["GITHUB_USERNAME"] && ENV["GITHUB_PASSWORD"]
+        puts "Connecting to Github"
         connect_to_github(true)
         provider = "github"
       elsif ENV["BITBUCKET_USERNAME"] && ENV["BITBUCKET_PASSWORD"]
+        puts "Connecting to Bitbucket"
         connect_to_bitbucket(true)
         provider = "bitbucket"
       end
     end
-
 
     if ((@user.nil? or @pass.nil?) and @token.nil?) or @uri.nil?
       raise Exception.new("Can't Connect to Source Control.  Please set the relevant environment variables.")

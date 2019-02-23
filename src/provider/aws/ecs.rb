@@ -3,7 +3,7 @@ require 'provider/aws/ecs/task'
 
 ECS_ENV_VARS_NOT_SET_EXCEPTION = 'In order to use the ECS Plugin, Please ensure the AWS_ACCES_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables are set'
 
-module Deploy
+module Provider
   module AWS
     #
     # The AWS::ECS Class Wraps the aws-sdk for ECS, allowing deploys to
@@ -31,7 +31,7 @@ module Deploy
       end
 
       def register_task_definition task_definition_name
-        task = Deploy::AWS::ECSTask.new @ecs_client, @config
+        task = Provider::AWS::ECSTask.new @ecs_client, @config
         task.register(task_definition_name)
 
         return task_definition_name
@@ -68,7 +68,7 @@ module Deploy
       end
 
       def task_exists?(task_definition)
-        task = Deploy::AWS::ECSTask.new @ecs_client, @config
+        task = Provider::AWS::ECSTask.new @ecs_client, @config
         return task.exists?(task_definition)
       end
 

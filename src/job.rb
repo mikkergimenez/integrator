@@ -1,23 +1,25 @@
 require 'config'
-require 'shell_runner'
+require 'tools/shell_runner'
 
 require 'steps/build'
 require 'steps/dependencies'
 require 'steps/deploy'
+require 'steps/supporting_services'
 require 'steps/tester'
 
 class Job
 
-  def initialize local_repo: nil, updated: nil
-    @local_repo = local_repo
-    @updated    = updated
+  def initialize local_repo: nil, updated: nil, flag_cleanup_dir: false
+    @local_repo       = local_repo
+    @updated          = updated
+    @flag_cleanup_dir = flag_cleanup_dir
 
     @shell_runner = ShellRunner.new checkout_dir
-    @uri = @local_repo.uri
-    @name = @local_repo.name
+    @uri          = @local_repo.uri
+    @name         = @local_repo.name
 
 
-    @tester = Tester.new @shell_runner
+    @tester       = Tester.new @shell_runner
   end
 
   def checkout_dir
@@ -25,22 +27,36 @@ class Job
   end
 
   def cleanup
-    puts "Cleaning up Build Directory #{checkout_dir}"
-    FileUtils.rm_rf(checkout_dir)
+    if @flag_cleanup_dir
+      puts "Cleaning up Build Directory #{checkout_dir}"
+      FileUtils.rm_rf(checkout_dir)
+    end
   end
 
   def config
-    @config ||= Config.new checkout_dir
+    @config ||= Config.new @local_repo
   end
 
   def deploy
-    puts "Deploying App"
+    puts "------ Deploying supporting services ----- "
+    deploy_supporting_services
+
+    puts "------ Deploying App ----- "
     deployer = Deploy.for(
-      deploy_method: config.deploy.method,
+      provider: config.deploy.provider,
       config: config,
-      runner: @runner
+      runner: @shell_runner
     )
-    deployer.start
+
+    begin
+      deployer.start
+    rescue Exception => e
+      puts e
+      puts config.deploy.provider
+      puts config
+      puts @shell_runner
+      puts e.backtrace
+    end
   end
 
   def install_dependencies
@@ -48,12 +64,21 @@ class Job
     @dependencies.install
   end
 
+  def deploy_supporting_services
+    @supporting_services = SupportingServices.new @local_repo.name, config, @shell_runner
+    @supporting_services.deploy
+  end
+
+  #
+  # Here is the main pipelines
+  #
   def job_pipeline
     checkout_dir = @local_repo.checkout
     install_dependencies
 
     if @tester.run config, checkout_dir
       @build = Build.new config, @local_repo.name, @shell_runner, @local_repo.uri
+      @build.print_summary @local_repo.latest_sha
       @build.pre
       @build.run
       @build.push
@@ -64,7 +89,7 @@ class Job
       notifier.ping  "Tests failed for repo #{@name}"
     end
 
-    @local_repo.last_updated = @updated
+    @local_repo.set_last_updated(@updated)
 
   end
 

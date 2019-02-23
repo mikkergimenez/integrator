@@ -1,4 +1,6 @@
-module Deploy
+require 'aws-sdk'
+
+module Provider
   module AWS
     class ECSTask
       def initialize client, config

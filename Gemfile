@@ -2,6 +2,7 @@ require 'rubygems'
 
 source 'https://rubygems.org'
 
+gem 'artii'
 gem 'aws-sdk'
 gem 'bundler'
 gem 'colorize'

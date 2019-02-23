@@ -4,6 +4,7 @@ require 'config/dns'
 require 'config/docker'
 require 'config/ecs'
 require 'config/environment'
+require 'config/kubernetes'
 require 'config/load_balancing'
 
 #
@@ -17,8 +18,8 @@ class Config
       @full_config = full_config
     end
 
-    def method
-      @full_config["deploy"]["method"]
+    def provider
+      @full_config["deploy"]["provider"]
     end
 
     def job_file
@@ -26,16 +27,28 @@ class Config
     end
   end
 
+  def app_name
+    return full_config[:app_name] if full_config[:app_name]
+    return @repo.name
+  end
 
   def full_config
+    return @overwritten_config if @overwritten_config
     return YAML.load_file("#{@repo_dir}/integrator.yml") if File.exist? "#{@repo_dir}/integrator.yml"
     return YAML.load_file("#{@repo_dir}/integrator.yaml") if File.exist? "#{@repo_dir}/integrator.yaml"
   end
 
-  def initialize(repo_dir)
-    @repo_dir = repo_dir
+  def overwrite_config config
+    @overwritten_config = config
+  end
 
-    @deploy = DeployConfig.new full_config
+  def initialize(repo)
+    @repo_dir           = repo.checkout_dir
+    @repo               = repo
+
+    @overwritten_config = nil
+
+    @deploy             = DeployConfig.new full_config
 
     puts "No integrator.yml found" if full_config.nil?
 
@@ -51,7 +64,11 @@ class Config
   end
 
   def install_command
-    return full_config["install"]["command"] if full_config["install"] && full_config["install"]["command"]
+    begin
+      return full_config["install"]["command"] if full_config["install"] && full_config["install"]["command"]
+    rescue
+      abort("install.command not set, dumping full_config: " + full_config.to_json())
+    end
     return "go get"         if language == "go"
     return "bundle package" if language == "ruby"
     return "npm install"    if language == "node"
@@ -66,12 +83,22 @@ class Config
   end
 
   def language
-    full_config["language"] if full_config["language"]
+    begin
+      full_config["language"] if full_config["language"]
+    rescue
+      abort("full_config.languge, dumping full_config: " + full_config.to_json())
+    end
     'ruby'    if File.exist? "#{@repo_dir}/Gemfile"
     'python'  if File.exist? "#{@repo_dir}/requirements.txt"
     'python'  if File.exist? "#{@repo_dir}/setup.py"
     'go'      if File.exist? "#{@repo_dir}/main.go"
     'node'    if File.exist? "#{@repo_dir}/package.json"
+  end
+
+  def git_sha
+    puts @repo
+    require 'pry'
+    binding.pry
   end
 
   def test
@@ -82,23 +109,37 @@ class Config
     full_config["pre_test"]
   end
 
+  def script; @script end
+
+  def helm_charts
+    return full_config[:helm_charts]
+  end
+
+  def helm
+    @helm       ||= ConfigHelm.new 'production'
+  end
+
   def dns
-    @dns      ||= ConfigDNS.new 'production', full_config
+    @dns        ||= ConfigDNS.new 'production', full_config
   end
 
   def load_balancing
-    @lbc      ||= ConfigLoadBalancing.new full_config
+    @lbc        ||= ConfigLoadBalancing.new full_config
+  end
+
+  def kubernetes
+    @kubernetes ||= Config::Kubernetes.new full_config, app_name
   end
 
   def ecs
-    @ecs      ||= ConfigECS.new full_config
+    @ecs        ||= ConfigECS.new full_config
   end
 
   def env_vars
-    @env_vars ||= ConfigEnvironment.new 'production', full_config
+    @env_vars   ||= ConfigEnvironment.new 'production', full_config
   end
 
   def docker
-    @docker   ||= ConfigDocker.new full_config
+    @docker     ||= ConfigDocker.new full_config, app_name
   end
 end

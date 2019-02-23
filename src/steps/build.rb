@@ -1,5 +1,7 @@
+require 'artii'
 require 'colorize'
 require 'config'
+require 'steps/deploy'
 require 'provider/aws/ecr'
 
 #
@@ -14,6 +16,24 @@ class Build
     @uri = repo_uri
   end
 
+  def print_summary latest_sha
+    a = Artii::Base.new :font => 'slant'
+    puts "*********************************************************************"
+    puts a.asciify(@config.app_name)
+
+    puts "Build Language: #{@config.language}"
+    puts "Deploying SHA: #{latest_sha}"
+    puts "Deploying to: #{@config.deploy.provider}"
+
+    deployer = Deploy.for(
+      provider: @config.deploy.provider,
+      config: @config,
+      runner: @shell_runner
+    )
+    deployer.print_deploy_info
+
+    puts "*********************************************************************"
+  end
 
   def pre
     @runner.repo_command(@config.pre_build) if @config.pre_build
@@ -39,8 +59,8 @@ class Build
       if @config.docker.registry.include?("dkr.ecr")
         matchdata = @config.docker.registry.match(/[0-9]{12}\.dkr\.ecr\.(.*).amazonaws.com.*/)
 
-        puts "If the following docker push does not work, try logging into ECR "
-        puts "Using: aws ecr get-login --no-include-email --region #{matchdata[1]} (pipe to bash to execute)"
+        puts "If the above docker push failed, use: "
+        puts "Use: aws ecr get-login --no-include-email --region #{matchdata[1]} (pipe to bash to execute)"
       end
     end
   end
