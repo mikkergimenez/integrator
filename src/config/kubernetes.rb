@@ -1,8 +1,6 @@
 class Config
   class Kubernetes
     def initialize(full_config, app_name)
-      puts 'Getting Docker Config from: '
-      p full_config
       @app_name = app_name
       @kubernetes_config = full_config['kubernetes']
       @full_config = full_config

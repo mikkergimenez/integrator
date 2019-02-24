@@ -9,12 +9,15 @@ require 'steps/tester'
 
 class Job
 
-  def initialize local_repo: nil, updated: nil, flag_cleanup_dir: false
-    @local_repo       = local_repo
+  def initialize config: nil, local_repo: nil, updated: nil, flag_cleanup_dir: false
+    @config             = config
+    @local_repo         = local_repo
+
     @updated          = updated
     @flag_cleanup_dir = flag_cleanup_dir
 
-    @shell_runner = ShellRunner.new checkout_dir
+    puts "Running job in Working Directory: #{config.working_directory}"
+    @shell_runner = ShellRunner.new config.working_directory
     @uri          = @local_repo.uri
     @name         = @local_repo.name
 
@@ -33,18 +36,14 @@ class Job
     end
   end
 
-  def config
-    @config ||= Config.new @local_repo
-  end
-
   def deploy
     puts "------ Deploying supporting services ----- "
     deploy_supporting_services
 
     puts "------ Deploying App ----- "
     deployer = Deploy.for(
-      provider: config.deploy.provider,
-      config: config,
+      provider: @config.deploy.provider,
+      config: @config,
       runner: @shell_runner
     )
 
@@ -52,20 +51,20 @@ class Job
       deployer.start
     rescue Exception => e
       puts e
-      puts config.deploy.provider
-      puts config
+      puts @config.deploy.provider
+      puts @config
       puts @shell_runner
       puts e.backtrace
     end
   end
 
   def install_dependencies
-    @dependencies = Dependencies.new config, @shell_runner
+    @dependencies = Dependencies.new @config, @shell_runner
     @dependencies.install
   end
 
   def deploy_supporting_services
-    @supporting_services = SupportingServices.new @local_repo.name, config, @shell_runner
+    @supporting_services = SupportingServices.new @local_repo.name, @config, @shell_runner
     @supporting_services.deploy
   end
 
@@ -76,8 +75,8 @@ class Job
     checkout_dir = @local_repo.checkout
     install_dependencies
 
-    if @tester.run config, checkout_dir
-      @build = Build.new config, @local_repo.name, @shell_runner, @local_repo.uri
+    if @tester.run @config, checkout_dir
+      @build = Build.new @config, @local_repo.name, @shell_runner, @local_repo.uri
       @build.print_summary @local_repo.latest_sha
       @build.pre
       @build.run
@@ -95,7 +94,7 @@ class Job
 
   def trigger
     puts "#{@local_repo.name} last Updated: #{@local_repo.last_updated}"
-    puts "Triggering build for repo: #{@local_repo.name}"
+    puts "Triggering build for repo: #{@local_repo.name} in dir #{@config.working_directory}"
     notifier = Slack::Notifier.new ENV["SLACK_HOOK_URL"]
     notifier.ping  "#{@local_repo.name} last Updated: #{@local_repo.last_updated}\nTriggering build for repo: #{@local_repo.name}"
 

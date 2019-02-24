@@ -1,5 +1,6 @@
 require 'provider/aws/ecs'
 require 'provider/kubernetes'
+require 'provider/helm'
 
 module Deploy
   class Deployer
@@ -76,12 +77,27 @@ module Deploy
     end
   end
 
+  class S3cmd < Deployer
+    def deploy
+      @runner.repo_command "s3cmd put -P --recursive #{@config.s3.files} s3://#{@config.s3.endpoint}"
+    end
+
+    def print_deploy_info
+      "Deploying with s3cmd"
+    end
+
+    def start
+      deploy
+    end
+  end
+
   DEFAULT_CLASS = Deployer
   DEPLOY_CLASSES = {
     'nomad'      => Nomad,
     'ecs'        => ECS,
     'kubernetes' => Kubernetes,
-    'helm'       => Helm
+    'helm'       => Helm,
+    's3cmd'      => S3cmd
  }
 
   def self.for(provider: nil, config: nil, runner: nil)

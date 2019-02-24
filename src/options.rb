@@ -23,6 +23,10 @@ def get_options
       end
     end
 
+    opts.on("-o", "--children-only", "Only run child jobs") do |children_only|
+      retval[:children_only] = true
+    end
+
     opts.on("-v", "--verbose", "Verbose logging options") do |verbose|
       retval[:verbose] = true
     end

@@ -21,7 +21,11 @@ class Build
     puts "*********************************************************************"
     puts a.asciify(@config.app_name)
 
+    puts @config.deploy
+    puts @config.build
+
     puts "Build Language: #{@config.language}"
+    puts "Build Method: #{@config.build.method}"
     puts "Deploying SHA: #{latest_sha}"
     puts "Deploying to: #{@config.deploy.provider}"
 
@@ -40,8 +44,11 @@ class Build
   end
 
   def run
-    puts "Pushing Container #{@config.docker.tag}"
-    @runner.repo_command "docker build -t #{@config.docker.tag} ."
+
+    puts "Building app with method #{@config.build.method}"
+    return @runner.repo_command "docker build -t #{@config.docker.tag} ." if @config.build.method == "docker"
+    return @runner.repo_command @config.build.script if @config.build.method == "script"
+    raise Exception("No valid config build method found")
   end
 
   def post
@@ -49,6 +56,7 @@ class Build
   end
 
   def push
+    return unless @config.build.method == "docker"
     if @config.docker.tag.include?("dkr.ecr")
       aws_ecr = Provider::AWS::ECR.new
       aws_ecr.check_for_or_create_repo @config.docker.image

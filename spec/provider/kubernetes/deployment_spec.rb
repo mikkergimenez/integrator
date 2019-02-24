@@ -22,10 +22,11 @@ RSpec.describe Provider::Kubernetes::Deploy do
     pkd = Provider::Kubernetes::Deployment.new config
 
     expected_yaml = """---
-apiVersion: apps/v1
+apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
   name: gitlab_app-deployment
+  namespace: default
 spec:
   selector:
     matchLabels:
@@ -36,9 +37,11 @@ spec:
       labels:
         app: gitlab_app
     spec:
+      imagePullSecrets:
+      - name: regcred
       containers:
       - name: gitlab_app
-        image: gitlab_app
+        image: \"/gitlab_app\"
         ports:
         - containerPort: 80
 """

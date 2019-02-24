@@ -4,14 +4,19 @@ require 'config/dns'
 require 'config/docker'
 require 'config/ecs'
 require 'config/environment'
+require 'config/helm'
 require 'config/kubernetes'
 require 'config/load_balancing'
-
+require 'config/s3'
 #
 # This class loads the YAML config
 #
 class Config
-  attr_reader :full_config, :deploy
+  attr_reader :full_config, :build, :deploy
+
+  def self.extract_config(local_repo, child="")
+    self.new local_repo, child
+  end
 
   class DeployConfig
     def initialize full_config
@@ -27,6 +32,21 @@ class Config
     end
   end
 
+
+  class BuildConfig
+    def initialize full_config
+      @full_config = full_config
+    end
+
+    def method
+      @full_config["build"]["method"]
+    end
+
+    def script
+      @full_config["build"]["script"]
+    end
+  end
+
   def app_name
     return full_config[:app_name] if full_config[:app_name]
     return @repo.name
@@ -34,7 +54,7 @@ class Config
 
   def full_config
     return @overwritten_config if @overwritten_config
-    return YAML.load_file("#{@repo_dir}/integrator.yml") if File.exist? "#{@repo_dir}/integrator.yml"
+    return YAML.load_file("#{@repo_dir}/#{@child_dir}integrator.yml") if File.exist? "#{@repo_dir}/#{@child_dir}integrator.yml"
     return YAML.load_file("#{@repo_dir}/integrator.yaml") if File.exist? "#{@repo_dir}/integrator.yaml"
   end
 
@@ -42,16 +62,27 @@ class Config
     @overwritten_config = config
   end
 
-  def initialize(repo)
+  def initialize(repo, child_dir="")
     @repo_dir           = repo.checkout_dir
     @repo               = repo
-
+    @child_dir          = child_dir
     @overwritten_config = nil
 
+    @build              = BuildConfig.new full_config
     @deploy             = DeployConfig.new full_config
 
-    puts "No integrator.yml found" if full_config.nil?
+    @logger             = Logger.new(STDERR)
 
+    @logger.warn "No integrator.yml found" if full_config.nil?
+  end
+
+  def children
+    return full_config["children"] if full_config["children"]
+    return []
+  end
+
+  def working_directory
+    return @repo.checkout_dir + "/" + @child_dir
   end
 
   def pre_build
@@ -116,7 +147,7 @@ class Config
   end
 
   def helm
-    @helm       ||= ConfigHelm.new 'production'
+    @helm       ||= ConfigHelm.new 'production', full_config
   end
 
   def dns
@@ -133,6 +164,10 @@ class Config
 
   def ecs
     @ecs        ||= ConfigECS.new full_config
+  end
+
+  def s3
+    @s3         ||= ConfigS3.new 'production', full_config
   end
 
   def env_vars

@@ -35,7 +35,8 @@ i = Integrator.new(
   provider=options[:provider],
   force_build=options[:force_build],
   forced_build_name=options[:forced_build_name],
-  flag_cleanup_dir=options[:flag_cleanup_dir]
+  flag_cleanup_dir=options[:flag_cleanup_dir],
+  children_only=options[:children_only]
 )
 
 i.run()

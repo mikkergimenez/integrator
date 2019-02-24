@@ -3,8 +3,6 @@
 #
 class ConfigDocker
   def initialize(full_config, app_name)
-    puts 'Getting Docker Config from: '
-    p full_config
     @app_name = app_name
     @docker_config = full_config['docker'] || {}
     @full_config = full_config

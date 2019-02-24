@@ -7,7 +7,7 @@ class ConfigHelm
     @environment = environment
   end
 
-  def helm_dir
+  def dir
     return @helm_config["directory"] || "helm-chart"
   end
 end

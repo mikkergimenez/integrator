@@ -42,7 +42,7 @@ class SourceControl
 
   def connect provider
     if provider
-      puts "Provider was set"
+      
       connect_to_gitlab if provider == "gitlab"
       connect_to_github if provider == "github"
       connect_to_bitbucket if provider == "bitbucket"
