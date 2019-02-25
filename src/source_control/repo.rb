@@ -1,5 +1,4 @@
 #    {"scm"=>"git", "has_wiki"=>false, "last_updated"=>"2015-12-09T15:34:43.949", "no_forks"=>false, "created_on"=>"2015-11-01T00:08:06.784", "owner"=>"mikkergp", "logo"=>"https://bitbucket.org/mikkergp/writebetter/avatar/32/?ts=1449671683", "email_mailinglist"=>"", "is_mq"=>false, "size"=>1340218, "read_only"=>false, "fork_of"=>nil, "mq_of"=>nil, "state"=>"available", "utc_created_on"=>"2015-10-31 23:08:06+00:00", "website"=>"", "description"=>"", "has_issues"=>false, "is_fork"=>false, "slug"=>"writebetter", "is_private"=>true, "name"=>"writebetter", "language"=>"javascript", "utc_last_updated"=>"2015-12-09 14:34:43+00:00", "no_public_forks"=>true, "creator"=>nil, "resource_uri"=>"/1.0/repositories/mikkergp/writebetter"}
-require 'builder'
 require 'fileutils'
 
 require 'git'
@@ -7,7 +6,7 @@ require 'job'
 require 'rake'
 
 class Repo
-  attr_accessor :name, :created_on, :logo, :slug, :ran_forced
+  attr_accessor :name, :created_on, :logo, :slug, :ran_forced, :g
 
   # @trigger_build = false
   def initialize(repo_obj, provider)
@@ -33,6 +32,7 @@ class Repo
         if File.exist?(checkout_dir)
 
           @g = Git.open(checkout_dir, :log => Logger.new("/tmp/integrator_log"))
+          @g.reset_hard("HEAD")
           @g.pull
           puts "Updated repo from #{uri}"
         else
@@ -68,7 +68,7 @@ class Repo
   def uri
     @name.chomp("/") if @name.end_with?("/")
     return @repo_obj["ssh_url_to_repo"] if @provider == "gitlab"
-    return "#{@owner}@bitbucket.org:#{@owner}/#{@name}.git" if @provider == "bitbucket"
+    return "https://#{@owner}:#{ENV["BITBUCKET_PASSWORD"]}@bitbucket.org/#{@owner}/#{@name}.git" if @provider == "bitbucket"
   end
 
   def ready? force_build: false, forced_build_name: nil

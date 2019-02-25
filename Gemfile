@@ -8,7 +8,11 @@ gem 'bundler'
 gem 'colorize'
 gem 'git'
 gem 'kubeclient'
-gem 'pry'
 gem 'rake'
 gem 'rspec'
 gem 'slack-notifier'
+
+group :development, :test do
+  gem 'pry'
+  gem 'rb-readline'
+end

@@ -127,9 +127,7 @@ class Config
   end
 
   def git_sha
-    puts @repo
-    require 'pry'
-    binding.pry
+    @repo.g.object('HEAD').sha[0..7]
   end
 
   def test
@@ -175,6 +173,6 @@ class Config
   end
 
   def docker
-    @docker     ||= ConfigDocker.new full_config, app_name
+    @docker     ||= ConfigDocker.new full_config, app_name, git_sha
   end
 end

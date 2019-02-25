@@ -57,3 +57,5 @@ Integrator supports the following deploy destinations:
 
 * [Hashicorp Nomad](https://www.nomadproject.io/)
 * [Amazon ECS](https://aws.amazon.com/ecs)
+* [Kubernetes](https://kubernetes.io)
+* [Amazon S3](https://aws.amazon.com/s3)

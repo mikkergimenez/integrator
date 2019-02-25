@@ -95,8 +95,10 @@ class Job
   def trigger
     puts "#{@local_repo.name} last Updated: #{@local_repo.last_updated}"
     puts "Triggering build for repo: #{@local_repo.name} in dir #{@config.working_directory}"
-    notifier = Slack::Notifier.new ENV["SLACK_HOOK_URL"]
-    notifier.ping  "#{@local_repo.name} last Updated: #{@local_repo.last_updated}\nTriggering build for repo: #{@local_repo.name}"
+    if ENV["SLACK_HOOK_URL"]
+      notifier = Slack::Notifier.new ENV["SLACK_HOOK_URL"]
+      notifier.ping  "#{@local_repo.name} last Updated: #{@local_repo.last_updated}\nTriggering build for repo: #{@local_repo.name}"
+    end
 
     begin
       job_pipeline
