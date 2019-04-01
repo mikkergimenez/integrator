@@ -13,6 +13,6 @@ gem 'rspec'
 gem 'slack-notifier'
 
 group :development, :test do
-  gem 'pry'
   gem 'rb-readline'
+  gem 'pry'
 end

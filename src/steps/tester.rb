@@ -12,12 +12,13 @@ class Tester
       @shell_runner.repo_command(config.pre_test)
     end
 
-    unless config.script
-      puts "No tests to run"
+    unless config.test["script"]
+      puts "No tests to run".red
       return true
     end
-    test_outcome = @shell_runner.repo_command(config.test.script)
 
+    test_outcome = @shell_runner.repo_command(config.test["script"])
+    
     puts "Test Outcome #{test_outcome}"
     test_outcome
   end
