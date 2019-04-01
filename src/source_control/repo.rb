@@ -14,6 +14,7 @@ class Repo
     @ran_forced      = false
     @provider        = provider
     @repo_obj        = repo_obj
+    puts repo_obj.to_json
     @created_on      = repo_obj['created_on']
     @name            = repo_obj['name'] || repo_obj[:name]
     @owner           = repo_obj['owner'] || repo_obj[:owner]
@@ -68,6 +69,7 @@ class Repo
   def uri
     @name.chomp("/") if @name.end_with?("/")
     return @repo_obj["ssh_url_to_repo"] if @provider == "gitlab"
+    return "git@github.com:#{@owner}/#{@name}.git" if @provider == "github"
     return "https://#{@owner}:#{ENV["BITBUCKET_PASSWORD"]}@bitbucket.org/#{@owner}/#{@name}.git" if @provider == "bitbucket"
   end
 

@@ -23,7 +23,11 @@ class ConfigDocker
 
   def tag
     abort("docker.registry must be set to deploy with docker") unless @docker_config.is_a?(Hash) && @docker_config['registry']
-    "#{@docker_config['registry']}/#{image}:#{@git_sha}"
+    if @docker_config['registry'] == "docker.io"
+      return "#{image}:#{@git_sha}"
+    else
+      return "#{@docker_config['registry']}/#{image}:#{@git_sha}"
+    end
   end
 
   def registry

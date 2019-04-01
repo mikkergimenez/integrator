@@ -5,7 +5,7 @@ class Tester
   end
 
   def run config, checkout_dir
-    puts "Running tests against #{@name}"
+    puts "Running tests against directory #{checkout_dir}"
     $LOAD_PATH.unshift(File.expand_path(checkout_dir)) unless $LOAD_PATH.include?(File.expand_path(checkout_dir))
 
     if config.pre_test
@@ -16,7 +16,7 @@ class Tester
       puts "No tests to run"
       return true
     end
-    test_outcome = @shell_runner.repo_command(config.script)
+    test_outcome = @shell_runner.repo_command(config.test.script)
 
     puts "Test Outcome #{test_outcome}"
     test_outcome

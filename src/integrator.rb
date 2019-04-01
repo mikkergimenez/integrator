@@ -88,6 +88,7 @@ class Integrator
       resp = http.request(req)
 
       @provider = provider
+      puts "Got Repos from #{@provider}"
       return JSON.parse(resp.body)
     end
 

@@ -39,11 +39,22 @@ class Config
     end
 
     def method
+      puts @full_config
       @full_config["build"]["method"]
     end
 
     def script
       @full_config["build"]["script"]
+    end
+  end
+
+  class TestConfig
+    def initialize full_config
+      @full_config = full_config
+    end
+
+    def script
+      @full_config["test"]["script"]
     end
   end
 
@@ -70,6 +81,7 @@ class Config
 
     @build              = BuildConfig.new full_config
     @deploy             = DeployConfig.new full_config
+    @test               = TestConfig.new full_config
 
     @logger             = Logger.new(STDERR)
 
@@ -87,7 +99,7 @@ class Config
 
   def pre_build
     begin
-      return full_config["pre_build"]["command"]
+      return full_config["pre_build"]["script"]
     rescue
       puts "No Pre-Build Step"
       return nil
@@ -96,7 +108,7 @@ class Config
 
   def install_command
     begin
-      return full_config["install"]["command"] if full_config["install"] && full_config["install"]["command"]
+      return full_config["install"]["script"] if full_config["install"] && full_config["install"]["script"]
     rescue
       abort("install.command not set, dumping full_config: " + full_config.to_json())
     end
@@ -106,7 +118,7 @@ class Config
   end
 
   def test_command
-    return full_config["test"]["command"] if full_config["test"] && full_config["test"]["command"]
+    return full_config["test"]["script"] if full_config["test"] && full_config["test"]["script"]
     return 'rake test'      if language == 'ruby'
     return 'go test ./...'  if language == 'go'
     return 'npm test'       if language == 'node'
