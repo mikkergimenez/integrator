@@ -84,8 +84,10 @@ class Job
       @build.post
       deploy
     else
-      notifier = Slack::Notifier.new ENV["SLACK_HOOK_URL"]
-      notifier.ping  "Tests failed for repo #{@name}"
+      if ENV["SLACK_HOOK_URL"]
+        notifier = Slack::Notifier.new ENV["SLACK_HOOK_URL"]
+        notifier.ping  "Tests failed for repo #{@name}"
+      end
     end
 
     @local_repo.set_last_updated(@updated)
