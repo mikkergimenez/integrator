@@ -9,7 +9,7 @@ require 'steps/tester'
 
 class Job
 
-  def initialize config: nil, local_repo: nil, updated: nil, flag_cleanup_dir: false
+  def initialize config: nil, local_repo: nil, updated: nil, flag_cleanup_dir: false, skip_tests: false
     @config             = config
     @local_repo         = local_repo
 
@@ -20,7 +20,7 @@ class Job
     @shell_runner = ShellRunner.new config.working_directory
     @uri          = @local_repo.uri
     @name         = @local_repo.name
-
+    @skip_tests   = skip_tests
 
     @tester       = Tester.new @shell_runner
   end
@@ -75,7 +75,7 @@ class Job
     checkout_dir = @local_repo.checkout
     install_dependencies
 
-    if @tester.run @config, checkout_dir
+    if @skip_tests or @tester.run @config, checkout_dir
       @build = Build.new @config, @local_repo.name, @shell_runner, @local_repo.uri
       @build.print_summary @local_repo.latest_sha
       @build.pre
@@ -87,6 +87,8 @@ class Job
       if ENV["SLACK_HOOK_URL"]
         notifier = Slack::Notifier.new ENV["SLACK_HOOK_URL"]
         notifier.ping  "Tests failed for repo #{@name}"
+      else
+        puts "TESTS FAILED"
       end
     end
 

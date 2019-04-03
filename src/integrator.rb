@@ -5,7 +5,7 @@ require 'source_control/main'
 
 class Integrator
 
-  def initialize provider=nil, force_build=false, forced_build_name=nil, flag_cleanup_dir=false, children_only=nil
+  def initialize provider=nil, force_build=false, forced_build_name=nil, flag_cleanup_dir=false, children_only=nil, flag_skip_tests=false
     @build_triggered    = false
 
     @children_only      = children_only
@@ -14,6 +14,7 @@ class Integrator
 
     @force_build        = force_build
     @forced_build_name  = forced_build_name
+    @skip_tests         = flag_skip_tests
 
     @provider           = provider
     @repos              = get_repos(provider)
@@ -44,10 +45,11 @@ class Integrator
       config = Config.extract_config(local_repo)
 
       job = Job.new(
-        config: config,
-        local_repo: local_repo,
-        updated: local_repo.last_updated,
+        config:           config,
+        local_repo:       local_repo,
+        updated:          local_repo.last_updated,
         flag_cleanup_dir: @flag_cleanup_dir,
+        skip_tests:       @skip_tests,
       )
 
       job.trigger() unless @children_only

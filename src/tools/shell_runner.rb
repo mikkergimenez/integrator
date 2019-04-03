@@ -8,7 +8,8 @@ class ShellRunner
   def run_repo_command command_string
     Bundler.with_clean_env do
       IO.popen('ls -la') { |io| io.read }
-      system "#{command_string}"
+      result = system "#{command_string}"
+      exit unless result
     end
   end
 

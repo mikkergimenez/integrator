@@ -35,6 +35,10 @@ def get_options
       retval[:build_name_filter] = build
     end
 
+    opts.on("-s", "--skip_tests", "Skip running unit tests.") do |verbose|
+      retval[:flag_skip_tests] = true
+    end
+
     opts.on("-c", "--cleanup_dir", "Clean up build directory after run.  Preserve Disk Space, but slow down successive builds because the repo is not cached.") do |verbose|
       retval[:flag_cleanup_dir] = true
     end

@@ -29,7 +29,6 @@ class Repo
       @g.pull # I don't think this pull is working
     else
       begin
-        puts "Checking out #{uri} for #{@name} to #{checkout_path} becoming #{checkout_dir}"
         if File.exist?(checkout_dir)
 
           @g = Git.open(checkout_dir, :log => Logger.new("/tmp/integrator_log"))

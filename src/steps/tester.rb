@@ -18,7 +18,7 @@ class Tester
     end
 
     test_outcome = @shell_runner.repo_command(config.test["script"])
-    
+
     puts "Test Outcome #{test_outcome}"
     test_outcome
   end
