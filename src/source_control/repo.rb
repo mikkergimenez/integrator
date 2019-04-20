@@ -34,7 +34,6 @@ class Repo
           @g = Git.open(checkout_dir, :log => Logger.new("/tmp/integrator_log"))
           @g.reset_hard("HEAD")
           @g.pull
-          puts "Updated repo from #{uri}"
         else
           @g = Git.clone(uri, @name, :path => checkout_path)
           puts "Checked out #{uri}"

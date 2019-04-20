@@ -16,7 +16,8 @@ class Job
     @updated          = updated
     @flag_cleanup_dir = flag_cleanup_dir
 
-    puts "Running job in Working Directory: #{config.working_directory}"
+    starting_job_message()
+
     @shell_runner = ShellRunner.new config.working_directory
     @uri          = @local_repo.uri
     @name         = @local_repo.name
@@ -115,6 +116,16 @@ class Job
     end
 
     puts "Job complete, going back to cycle"
+  end
+
+  private
+  def starting_job_message
+    puts
+    puts
+    puts "============================================================="
+    puts "Running job in Working Directory: #{config.working_directory}"
+    puts "-------------------------------------------------------------"
+    puts
   end
 
 end

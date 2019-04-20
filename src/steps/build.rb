@@ -21,8 +21,10 @@ class Build
     puts "*********************************************************************"
     puts a.asciify(@config.app_name)
 
-    puts @config.deploy
-    puts @config.build
+    puts "Deploy Provider: #{@config.deploy.provider}"
+    puts "Deploy Job File: #{@config.deploy.job_file}"
+    puts "Deploy Method: #{@config.build.method}"
+    puts "Deploy Build Script: #{@config.build.script}"
 
     puts "Build Language: #{@config.language}"
     puts "Build Method: #{@config.build.method}"

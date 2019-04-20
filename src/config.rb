@@ -18,6 +18,16 @@ class Config
     self.new local_repo, child
   end
 
+  class Scriptable
+    def script
+      @full_config[@key]["script"]
+    end
+
+    def env
+      @full_config[@key]["env"]
+    end
+  end
+
   class DeployConfig
     def initialize full_config
       @full_config = full_config
@@ -38,24 +48,21 @@ class Config
       @full_config = full_config
     end
 
+    @key = "build"
+
     def method
       puts @full_config
       @full_config["build"]["method"]
     end
-
-    def script
-      @full_config["build"]["script"]
-    end
   end
 
   class TestConfig
+    include Config::Scriptable
     def initialize full_config
       @full_config = full_config
     end
 
-    def script
-      @full_config["test"]["script"]
-    end
+    @key = "test"
   end
 
   def app_name

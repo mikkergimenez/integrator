@@ -17,7 +17,6 @@ class Integrator
     @skip_tests         = flag_skip_tests
 
     @provider           = provider
-    @repos              = get_repos(provider)
   end
 
   #
