@@ -1,4 +1,5 @@
 require 'bundler'
+require 'tools/logger'
 
 class ShellRunner
   def initialize checkout_dir
@@ -16,7 +17,7 @@ class ShellRunner
   end
 
   def repo_command command_string
-    puts "\nRunning #{command_string} in #{@checkout_dir}"
+    Logger.section "Running #{command_string} in #{@checkout_dir}"
     Dir.chdir(@checkout_dir) do
       if command_string.kind_of?(String)
         return run_repo_command command_string

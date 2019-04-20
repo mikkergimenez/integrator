@@ -1,0 +1,2 @@
+test:
+  script: working_stub_script.sh

@@ -1,4 +1,5 @@
 require 'config'
+require 'tools/logger'
 require 'tools/shell_runner'
 
 require 'steps/build'
@@ -6,6 +7,8 @@ require 'steps/dependencies'
 require 'steps/deploy'
 require 'steps/supporting_services'
 require 'steps/tester'
+
+
 
 class Job
 
@@ -16,14 +19,14 @@ class Job
     @updated          = updated
     @flag_cleanup_dir = flag_cleanup_dir
 
-    starting_job_message()
+    Logger.job_start "Running job in Working Directory: #{@config.working_directory}"
 
     @shell_runner = ShellRunner.new config.working_directory
     @uri          = @local_repo.uri
     @name         = @local_repo.name
     @skip_tests   = skip_tests
 
-    @tester       = Tester.new @shell_runner
+    @tester       = Tester.new @config, @shell_runner
   end
 
   def checkout_dir
@@ -97,15 +100,22 @@ class Job
 
   end
 
+  def run_pre_checks
+    puts ""
+    ok, message = @tester.run_pre_checks
+    puts ""
+  end
+
   def trigger
-    puts "#{@local_repo.name} last Updated: #{@local_repo.last_updated}"
-    puts "Triggering build for repo: #{@local_repo.name} in dir #{@config.working_directory}"
+    Logger.section "#{@local_repo.name} Last Updated: #{@local_repo.last_updated}"
+    Logger.section "Triggering build for repo: #{@local_repo.name} in dir #{@config.working_directory}"
     if ENV["SLACK_HOOK_URL"]
       notifier = Slack::Notifier.new ENV["SLACK_HOOK_URL"]
       notifier.ping  "#{@local_repo.name} last Updated: #{@local_repo.last_updated}\nTriggering build for repo: #{@local_repo.name}"
     end
 
     begin
+      run_pre_checks
       job_pipeline
     rescue StandardError => e
       puts "\n"
@@ -115,17 +125,6 @@ class Job
       puts "\n\n\n"
     end
 
-    puts "Job complete, going back to cycle"
+    Logger.job_end "Job complete, going back to cycle"
   end
-
-  private
-  def starting_job_message
-    puts
-    puts
-    puts "============================================================="
-    puts "Running job in Working Directory: #{config.working_directory}"
-    puts "-------------------------------------------------------------"
-    puts
-  end
-
 end

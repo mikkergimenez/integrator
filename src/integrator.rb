@@ -2,6 +2,7 @@ require 'config'
 
 require 'source_control/repos'
 require 'source_control/main'
+require 'tools/logger'
 
 class Integrator
 
@@ -53,7 +54,7 @@ class Integrator
 
       job.trigger() unless @children_only
 
-      puts "Starting #{config.children.count} child builds"
+      Logger.section "Starting #{config.children.count} child builds"
       config.children.each do |child|
         child_config = Config.extract_config(local_repo, child)
         jobc = Job.new(
@@ -89,8 +90,12 @@ class Integrator
       resp = http.request(req)
 
       @provider = provider
-      puts "Got Repos from #{@provider}"
-      return JSON.parse(resp.body)
+
+      body_json = JSON.parse(resp.body)
+
+      Logger.section "Got #{body_json.length} Repos from #{@provider}"
+
+      return body_json
     end
 
     #

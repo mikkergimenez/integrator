@@ -16,7 +16,7 @@ module Provider
       app_deployed = @runner.repo_command "helm list |grep #{@config.app_name}"
       if app_deployed
         helm_command = "helm upgrade #{@config.app_name} #{@config.helm.dir} --set image.tag=#{@config.git_sha}"
-        puts "Deploying helm chart using command #{helm_command} "
+        Logger.section "Deploying helm chart using command #{helm_command} "
         @runner.repo_command helm_command
       end
     end

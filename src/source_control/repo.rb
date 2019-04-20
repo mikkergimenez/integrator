@@ -14,7 +14,6 @@ class Repo
     @ran_forced      = false
     @provider        = provider
     @repo_obj        = repo_obj
-    puts repo_obj.to_json
     @created_on      = repo_obj['created_on']
     @name            = repo_obj['name'] || repo_obj[:name]
     @owner           = repo_obj['owner'] || repo_obj[:owner]

@@ -8,23 +8,26 @@ require 'config/helm'
 require 'config/kubernetes'
 require 'config/load_balancing'
 require 'config/s3'
+require 'tools/logger'
 #
 # This class loads the YAML config
 #
 class Config
-  attr_reader :full_config, :build, :deploy
+  attr_reader :full_config
 
   def self.extract_config(local_repo, child="")
     self.new local_repo, child
   end
 
-  class Scriptable
+  module Scriptable
     def script
-      @full_config[@key]["script"]
+      return @full_config[@key]["script"] if @full_config[@key]
+      false
     end
 
     def env
-      @full_config[@key]["env"]
+      return @full_config[@key]["env"] if @full_config[@key]
+      false
     end
   end
 
@@ -44,11 +47,13 @@ class Config
 
 
   class BuildConfig
+    include Config::Scriptable
+    attr_reader :full_config, :key
+
     def initialize full_config
       @full_config = full_config
+      @key = "build"
     end
-
-    @key = "build"
 
     def method
       puts @full_config
@@ -58,11 +63,30 @@ class Config
 
   class TestConfig
     include Config::Scriptable
+    attr_reader :full_config, :key
+
     def initialize full_config
       @full_config = full_config
+      @key = "test"
     end
 
-    @key = "test"
+    def dependencies
+      if @full_config["test"]["deps"] and @full_config["test"]["dependencies"]
+        Logger.warning("test.deps in yaml file will override test.dependencies")
+      end
+      return @full_config["test"]["deps"] || @full_config["test"]["dependencies"] || Array.new
+    end
+
+  end
+
+  class PreTestConfig
+    attr_reader :full_config, :key
+
+    include Config::Scriptable
+    def initialize full_config
+      @full_config = full_config
+      @key = "pre_test"
+    end
   end
 
   def app_name
@@ -85,10 +109,6 @@ class Config
     @repo               = repo
     @child_dir          = child_dir
     @overwritten_config = nil
-
-    @build              = BuildConfig.new full_config
-    @deploy             = DeployConfig.new full_config
-    @test               = TestConfig.new full_config
 
     @logger             = Logger.new(STDERR)
 
@@ -146,21 +166,32 @@ class Config
   end
 
   def git_sha
-    @repo.g.object('HEAD').sha[0..7]
-  end
-
-  def test
-    full_config["test"]
-  end
-
-  def pre_test
-    full_config["pre_test"]
+    if @repo.g
+      return @repo.g.object('HEAD').sha[0..7]
+    else
+      return 'latest'
+    end
   end
 
   def script; @script end
 
   def helm_charts
     return full_config[:helm_charts]
+  end
+
+  def build
+    @build    ||= BuildConfig.new   full_config
+  end
+
+  def deploy
+    @deploy   ||= DeployConfig.new  full_config
+  end
+  def test
+    @test     ||= TestConfig.new    full_config
+  end
+
+  def pre_test
+    @pre_test ||= PreTestConfig.new full_config
   end
 
   def helm
