@@ -42,6 +42,8 @@ class Integrator
     # Start a build job.
     #
     def run_build local_repo
+      checkout_dir = local_repo.checkout
+
       config = Config.extract_config(local_repo)
 
       job = Job.new(

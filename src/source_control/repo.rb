@@ -24,18 +24,18 @@ class Repo
 
   def checkout
     if @g
-      puts 'Pulling latest '
+      Logger.section "Pulling Latest"
       @g.pull # I don't think this pull is working
     else
       begin
         if File.exist?(checkout_dir)
-
+          Logger.section "Resetting Repo"
           @g = Git.open(checkout_dir, :log => Logger.new("/tmp/integrator_log"))
           @g.reset_hard("HEAD")
           @g.pull
         else
+          Logger.section "Cloning Repo"
           @g = Git.clone(uri, @name, :path => checkout_path)
-          puts "Checked out #{uri}"
         end
         puts @g
       rescue Git::GitExecuteError => e

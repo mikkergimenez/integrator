@@ -67,14 +67,18 @@ class Config
 
     def initialize full_config
       @full_config = full_config
+      abort("No config passed to TestConfig") unless @full_config
       @key = "test"
     end
 
     def dependencies
+      return [] unless @full_config["test"]
       if @full_config["test"]["deps"] and @full_config["test"]["dependencies"]
         Logger.warning("test.deps in yaml file will override test.dependencies")
       end
-      return @full_config["test"]["deps"] || @full_config["test"]["dependencies"] || Array.new
+      return @full_config["test"]["deps"] if @full_config["test"]["deps"]
+      return @full_config["test"]["dependencies"] if @full_config["test"]["dependencies"]
+      Array.new
     end
 
   end

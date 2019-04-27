@@ -76,7 +76,7 @@ class Job
   # Here is the main pipelines
   #
   def job_pipeline
-    checkout_dir = @local_repo.checkout
+    run_pre_checks
     install_dependencies
 
     if @skip_tests or @tester.run @config, checkout_dir
@@ -115,7 +115,6 @@ class Job
     end
 
     begin
-      run_pre_checks
       job_pipeline
     rescue StandardError => e
       puts "\n"
