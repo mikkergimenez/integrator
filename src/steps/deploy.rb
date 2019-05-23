@@ -79,7 +79,7 @@ module Deploy
 
   class S3cmd < Deployer
     def deploy
-      @runner.repo_command "aws s3 sync #{@config.s3.files} s3://#{@config.s3.endpoint}  --delete --only-show-errors"
+      @runner.repo_command "aws s3 sync #{@config.s3.files} s3://#{@config.s3.endpoint}  --delete --only-show-errors --acl public-read"
     end
 
     def print_deploy_info
