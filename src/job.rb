@@ -19,8 +19,6 @@ class Job
     @updated          = updated
     @flag_cleanup_dir = flag_cleanup_dir
 
-    Logger.job_start "Running job in Working Directory: #{@config.working_directory}"
-
     @shell_runner = ShellRunner.new config.working_directory
     @uri          = @local_repo.uri
     @name         = @local_repo.name
