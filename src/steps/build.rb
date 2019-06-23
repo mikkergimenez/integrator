@@ -24,7 +24,7 @@ class Build
     puts "Deploy Provider:     #{@config.deploy.provider}"
     puts "Deploy Job File:     #{@config.deploy.job_file}"
     puts "Deploy Method:       #{@config.build.method}"
-    puts "Deploy Build Script: #{@config.build.script}"
+    puts "Deploy Build Script: #{@config.build.command}"
 
     puts "Build Language: #{@config.language}"
     puts "Build Method: #{@config.build.method}"
@@ -49,7 +49,7 @@ class Build
 
     puts "Building app with method #{@config.build.method}"
     return @runner.repo_command "docker build -t #{@config.docker.tag} ." if @config.build.method == "docker"
-    return @runner.repo_command @config.build.script if @config.build.method == "script"
+    return @runner.repo_command @config.build.command if @config.build.method == "command"
     raise Exception("No valid config build method found")
   end
 

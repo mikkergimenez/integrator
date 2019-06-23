@@ -20,8 +20,8 @@ class Config
   end
 
   module Scriptable
-    def script
-      return @full_config[@key]["script"] if @full_config[@key]
+    def command
+      return @full_config[@key]["command"] if @full_config[@key]
       false
     end
 
@@ -130,7 +130,7 @@ class Config
 
   def pre_build
     begin
-      return full_config["pre_build"]["script"]
+      return full_config["pre_build"]["command"]
     rescue
       puts "No Pre-Build Step"
       return nil
@@ -139,7 +139,7 @@ class Config
 
   def install_command
     begin
-      return full_config["install"]["script"] if full_config["install"] && full_config["install"]["script"]
+      return full_config["install"]["command"] if full_config["install"] && full_config["install"]["command"]
     rescue
       abort("install.command not set, dumping full_config: " + full_config.to_json())
     end
@@ -149,7 +149,7 @@ class Config
   end
 
   def test_command
-    return full_config["test"]["script"] if full_config["test"] && full_config["test"]["script"]
+    return full_config["test"]["command"] if full_config["test"] && full_config["test"]["command"]
     return 'rake test'      if language == 'ruby'
     return 'go test ./...'  if language == 'go'
     return 'npm test'       if language == 'node'
@@ -177,7 +177,7 @@ class Config
     end
   end
 
-  def script; @script end
+  def command; @command end
 
   def helm_charts
     return full_config[:helm_charts]

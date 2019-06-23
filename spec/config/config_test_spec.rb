@@ -11,6 +11,6 @@ RSpec.describe Config do
 
     config.overwrite_config(working_stub)
 
-    expect(config.test.script).to eq("working_stub_script.sh")
+    expect(config.test.command).to eq("working_stub_script.sh")
   end
 end

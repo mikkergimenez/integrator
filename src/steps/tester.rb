@@ -26,16 +26,16 @@ class Tester
     Logger.section "Running tests against directory #{checkout_dir}"
     $LOAD_PATH.unshift(File.expand_path(checkout_dir)) unless $LOAD_PATH.include?(File.expand_path(checkout_dir))
 
-    if config.pre_test.script
-      @shell_runner.repo_command(config.pre_test.script)
+    if config.pre_test.command
+      @shell_runner.repo_command(config.pre_test.command)
     end
 
-    unless config.test.script
+    unless config.test.command
       puts "No tests to run".red
       return true
     end
 
-    test_outcome = @shell_runner.repo_command(config.test.script)
+    test_outcome = @shell_runner.repo_command(config.test.command)
 
     puts "Test Outcome #{test_outcome}"
     test_outcome
