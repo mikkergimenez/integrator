@@ -1,7 +1,11 @@
 require 'steps/dependencies/mongodb'
+require 'steps/dependencies/s3cmd'
+require 'steps/supporting_services/helm_chart'
 
 DEPENDENCIES = {
-  'mongodb' => TestDependencies::MongoDB
+  'mongodb' => TestDependencies::MongoDB,
+  'helm' => TestDependencies::HelmChart,
+  's3cmd' => TestDependencies::S3CMD
 }
 
 class Tester
@@ -14,7 +18,7 @@ class Tester
     retval = true
 
     @config.test.dependencies.each do |dependency|
-      ok, message = DEPENDENCIES[dependency].check
+      ok, message = DEPENDENCIES[dependency].check @shell_runner
       Logger.check(ok, message)
       retval = false if ok == false
     end

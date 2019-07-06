@@ -89,15 +89,14 @@ class Integrator
     def get_repos provider
       sc = SourceControl.new
       req, http, provider = sc.connect(provider)
-      resp = http.request(req)
+      resp                = sc.request(http, req)
+      repos               = sc.parse(provider, resp)
 
       @provider = provider
 
-      body_json = JSON.parse(resp.body)
+      Logger.section "Got #{repos.length} Repos from #{@provider}"
 
-      Logger.section "Got #{body_json.length} Repos from #{@provider}"
-
-      return body_json
+      return repos
     end
 
     #

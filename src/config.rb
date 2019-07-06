@@ -72,13 +72,24 @@ class Config
     end
 
     def dependencies
-      return [] unless @full_config["test"]
+      authenticated_deploy_providers = ["helm", "s3cmd"]
+
+      all_dependencies = Array.new
+
+      if @full_config["deploy"] && @full_config["deploy"]["provider"]
+        all_dependencies << @full_config["deploy"]["provider"] if authenticated_deploy_providers.include? @full_config["deploy"]["provider"]
+      end
       if @full_config["test"]["deps"] and @full_config["test"]["dependencies"]
         Logger.warning("test.deps in yaml file will override test.dependencies")
       end
-      return @full_config["test"]["deps"] if @full_config["test"]["deps"]
-      return @full_config["test"]["dependencies"] if @full_config["test"]["dependencies"]
-      Array.new
+
+      if @full_config["test"]["deps"]
+        all_dependencies.concat @full_config["test"]["deps"]
+      elsif @full_config["test"]["dependencies"]
+        all_dependencies.concat @full_config["test"]["dependencies"]
+      end
+
+      all_dependencies
     end
 
   end
@@ -190,9 +201,6 @@ class Config
   def deploy
     @deploy   ||= DeployConfig.new  full_config
   end
-  def test
-    @test     ||= TestConfig.new    full_config
-  end
 
   def pre_test
     @pre_test ||= PreTestConfig.new full_config
@@ -228,5 +236,9 @@ class Config
 
   def docker
     @docker     ||= ConfigDocker.new full_config, app_name, git_sha
+  end
+
+  def test
+    @test     ||= TestConfig.new    full_config
   end
 end

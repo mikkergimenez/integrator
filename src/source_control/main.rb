@@ -7,7 +7,7 @@ class SourceControl
     @user          = ENV["BITBUCKET_USERNAME"]
     @pass          = ENV["BITBUCKET_PASSWORD"]
 
-    @uri           = URI('https://api.bitbucket.org/1.0/user/repositories')
+    @uri           = URI("https://api.bitbucket.org/2.0/repositories/#{@user}?pagelen=100")
 
     @authentication = "basic_auth"
 
@@ -40,9 +40,22 @@ class SourceControl
 
   end
 
+  def request http, req
+    return http.request(req)
+  end
+
+  def parse provider, resp
+    body = JSON.parse(resp.body)
+
+    if provider == "bitbucket"
+      return body["values"]
+    end
+    return body
+  end
+
   def connect provider
     if provider
-      
+
       connect_to_gitlab if provider == "gitlab"
       connect_to_github if provider == "github"
       connect_to_bitbucket if provider == "bitbucket"

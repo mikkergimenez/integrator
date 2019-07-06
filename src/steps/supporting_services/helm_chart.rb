@@ -21,3 +21,16 @@ class HelmChart
     end
   end
 end
+
+module TestDependencies
+  class HelmChart
+    def self.check runner
+      result = runner.repo_command("helm version", echo: false)
+      if result
+        return true, "Helm is authenticated"
+      else
+        return false, "Helm is not authenticated, update ~/.kube/config"
+      end
+    end
+  end
+end

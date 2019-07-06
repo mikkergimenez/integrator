@@ -3,6 +3,7 @@ require 'fileutils'
 
 require 'git'
 require 'job'
+require 'pp'
 require 'rake'
 
 class Repo
@@ -16,10 +17,18 @@ class Repo
     @repo_obj        = repo_obj
     @created_on      = repo_obj['created_on']
     @name            = repo_obj['name'] || repo_obj[:name]
-    @owner           = repo_obj['owner'] || repo_obj[:owner]
+    @owner           = owner(repo_obj)
     @logo            = repo_obj['logo'] || repo_obj[:logo]
     @slug            = repo_obj['slug'] || repo_obj[:slug]
     @last_updated_at = repo_obj["last_updated"] || repo_obj[:last_updated]
+
+  end
+
+  def owner repo_obj
+    if @provider == "bitbucket"
+      return repo_obj['owner']['nickname'] || repo_obj[:owner][:nickname]
+    end
+    return repo_obj["owner"]
   end
 
   def checkout
@@ -52,6 +61,7 @@ class Repo
 
   def last_updated
     return @repo_obj["last_activity_at"] if @provider == "gitlab"
+    return @repo_obj["updated_on"] if @provider == "bitbucket"
     @last_updated_at
   end
 
@@ -81,6 +91,7 @@ class Repo
   end
 
   def been_updated? current_last_updated
+    puts "Checking if updated (Current: #{current_last_updated}) {Last: #{last_updated}}"
     return false unless current_last_updated
     return last_updated != current_last_updated
   end

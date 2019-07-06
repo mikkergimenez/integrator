@@ -49,7 +49,7 @@ class Build
 
     puts "Building app with method #{@config.build.method}"
     return @runner.repo_command "docker build -t #{@config.docker.tag} ." if @config.build.method == "docker"
-    return @runner.repo_command @config.build.command if @config.build.method == "command"
+    return @runner.repo_command @config.build.command                     if @config.build.method == "command"
     raise Exception("No valid config build method found")
   end
 
