@@ -716,7 +716,7 @@ GEM
       domain_name (~> 0.5)
     http-form_data (2.1.1)
     http_parser.rb (0.6.0)
-    jmespath (1.4.0)
+    jmespath (1.6.1)
     kubeclient (4.2.2)
       http (~> 3.0)
       recursive-open-struct (~> 1.0, >= 1.0.4)
